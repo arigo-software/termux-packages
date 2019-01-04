@@ -20,7 +20,7 @@ PACKAGES+=" libglib2.0-dev" # Provides 'glib-genmarshal' which the glib build us
 PACKAGES+=" libtool-bin"
 PACKAGES+=" libncurses5-dev" # Used by mariadb for host build part.
 PACKAGES+=" lzip"
-PACKAGES+=" python3.6"
+PACKAGES+=" python3.7"
 PACKAGES+=" tar"
 PACKAGES+=" unzip"
 PACKAGES+=" m4"
@@ -36,6 +36,7 @@ PACKAGES+=" xmlto"
 PACKAGES+=" libexpat1-dev" # Needed by ghostscript
 PACKAGES+=" libjpeg-dev" # Needed by ghostscript
 PACKAGES+=" gawk" # Needed by apr-util
+PACKAGES+=" libssl-dev" # Needed to build Rust
 
 sudo DEBIAN_FRONTEND=noninteractive \
 	apt-get install -yq --no-install-recommends $PACKAGES

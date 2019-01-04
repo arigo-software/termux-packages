@@ -3,8 +3,6 @@ TERMUX_PKG_DESCRIPTION="Platform built on Chrome's JavaScript runtime for easily
 TERMUX_PKG_VERSION=10.14.0
 TERMUX_PKG_SHA256=b05a52e556df813eb3f36c795784956b1c3c3b078cef930af6c1f2fb93642929
 TERMUX_PKG_SRCURL=https://nodejs.org/dist/v${TERMUX_PKG_VERSION}/node-v${TERMUX_PKG_VERSION}.tar.xz
-# Note that we do not use a shared libuv to avoid an issue with the Android
-# linker, which does not use symbols of linked shared libraries when resolving
 # symbols on dlopen(). See https://github.com/termux/termux-packages/issues/462.
 TERMUX_PKG_DEPENDS="openssl, c-ares, libicu"
 TERMUX_PKG_RM_AFTER_INSTALL="lib/node_modules/npm/html lib/node_modules/npm/make.bat share/systemtap lib/dtrace"
@@ -38,7 +36,6 @@ termux_step_configure () {
 		--dest-os=android \
 		--shared-cares \
 		--shared-openssl \
-		--shared-zlib \
 		--without-inspector \
 		--with-intl=system-icu \
 		--without-snapshot \
