@@ -1,8 +1,10 @@
 TERMUX_PKG_HOMEPAGE=https://www.imagemagick.org/
 TERMUX_PKG_DESCRIPTION="Suite to create, edit, compose, or convert images in a variety of formats"
-TERMUX_PKG_VERSION=7.0.8.14
-TERMUX_PKG_SHA256=0814f5599805ac7dfd6f46eefc7ea58c0a40dec6eb16b0a7ee0d499d3348e2c6
-local _download_version=`echo $TERMUX_PKG_VERSION | sed 's/\(.*\)\./\1-/'`
+TERMUX_PKG_LICENSE="ImageMagick"
+TERMUX_PKG_VERSION=7.0.8.40
+TERMUX_PKG_REVISION=1
+TERMUX_PKG_SHA256=f82e2aace538c2cefcb777dc0c5f60a239b7d1abdde4c2989f26be3daf0910f0
+local _download_version=$(echo $TERMUX_PKG_VERSION | sed 's/\(.*\)\./\1-/')
 TERMUX_PKG_SRCURL=https://github.com/ImageMagick/ImageMagick/archive/${_download_version}.tar.gz
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 --disable-largefile
@@ -14,7 +16,6 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 --with-lzma
 --disable-openmp
 ac_cv_func_ftime=no
-ac_cv_header_complex_h=no
 "
 TERMUX_PKG_RM_AFTER_INSTALL="
 bin/Magick-config
