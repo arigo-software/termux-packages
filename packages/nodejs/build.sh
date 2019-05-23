@@ -36,7 +36,7 @@ termux_step_configure () {
 		--dest-os=android \
 		--shared-cares \
 		--shared-openssl \
-		--without-inspector \
+		--shared-zlib \
 		--with-intl=system-icu \
 		--without-snapshot \
 		--cross-compiling
