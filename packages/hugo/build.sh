@@ -1,9 +1,10 @@
 TERMUX_PKG_HOMEPAGE=https://gohugo.io/
 TERMUX_PKG_DESCRIPTION="A fast and flexible static site generator"
 TERMUX_PKG_LICENSE="Apache-2.0"
-TERMUX_PKG_VERSION=0.55.5
-TERMUX_PKG_SHA256=372280e86fd97bf41e7e1307672328f99911f487b0e9c4245b906717a00f1747
+TERMUX_PKG_VERSION=0.58.3
 TERMUX_PKG_SRCURL=https://github.com/gohugoio/hugo/archive/v$TERMUX_PKG_VERSION.tar.gz
+TERMUX_PKG_SHA256=4733f22fc447d745c88f7c688407d67e9ab67e7e276557f3a48edd8b37900718
+TERMUX_PKG_DEPENDS="libc++"
 
 termux_step_make() {
 	termux_setup_golang
@@ -12,8 +13,10 @@ termux_step_make() {
 	cd $TERMUX_PKG_SRCDIR
 	go build \
 		-o "$TERMUX_PREFIX/bin/hugo" \
-		-tags extended \
+		-tags "linux extended" \
 		main.go
+		# "linux" tag should not be necessary
+		# try removing when golang version is upgraded
 
 	# Building for host to generate manpages and completion.
 	chmod 700 -R $GOPATH/pkg && rm -rf $GOPATH/pkg
@@ -21,8 +24,10 @@ termux_step_make() {
 	unset CC CXX CFLAGS CXXFLAGS LDFLAGS
 	go build \
 		-o "$TERMUX_PKG_BUILDDIR/hugo" \
-		-tags extended \
+		-tags "linux extended" \
 		main.go
+		# "linux" tag should not be necessary
+		# try removing when golang version is upgraded
 }
 
 termux_step_make_install() {
@@ -32,8 +37,4 @@ termux_step_make_install() {
 		--completionfile=$TERMUX_PREFIX/share/bash-completion/completions/hugo
 	$TERMUX_PKG_BUILDDIR/hugo gen man \
 		--dir=$TERMUX_PREFIX/share/man/man1/
-
-	# Seems that some files became RO-only
-	# and should be manually removed.
-	chmod 700 -R $GOPATH/pkg && rm -rf $GOPATH/pkg
 }

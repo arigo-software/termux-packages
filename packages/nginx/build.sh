@@ -1,9 +1,9 @@
 TERMUX_PKG_HOMEPAGE=https://www.nginx.org
 TERMUX_PKG_DESCRIPTION="Lightweight HTTP server"
 TERMUX_PKG_LICENSE="BSD 2-Clause"
-TERMUX_PKG_VERSION=1.16.0
-TERMUX_PKG_SHA256=4fd376bad78797e7f18094a00f0f1088259326436b537eb5af69b01be2ca1345
+TERMUX_PKG_VERSION=1.17.3
 TERMUX_PKG_SRCURL=http://nginx.org/download/nginx-$TERMUX_PKG_VERSION.tar.gz
+TERMUX_PKG_SHA256=3b84fe1c2cf9ca22fde370e486a9ab16b6427df1b6ea62cdb61978c9f34d0f3c
 TERMUX_PKG_BUILD_IN_SRC=true
 TERMUX_PKG_DEPENDS="libandroid-glob, libcrypt, pcre, openssl, zlib"
 TERMUX_PKG_CONFFILES="etc/nginx/fastcgi.conf etc/nginx/fastcgi_params etc/nginx/koi-win etc/nginx/koi-utf
@@ -11,6 +11,12 @@ etc/nginx/mime.types etc/nginx/nginx.conf etc/nginx/scgi_params etc/nginx/uwsgi_
 TERMUX_PKG_MAINTAINER="Vishal Biswas @vishalbiswas"
 
 termux_step_pre_configure() {
+	# Certain packages are not safe to build on device because their
+	# build.sh script deletes specific files in $TERMUX_PREFIX.
+	if $TERMUX_ON_DEVICE_BUILD; then
+		termux_error_exit "Package '$TERMUX_PKG_NAME' is not safe for on-device builds."
+	fi
+
 	CPPFLAGS="$CPPFLAGS -DIOV_MAX=1024"
 	LDFLAGS="$LDFLAGS -landroid-glob"
 
@@ -20,7 +26,7 @@ termux_step_pre_configure() {
 
 termux_step_configure() {
 	DEBUG_FLAG=""
-	test -n "$TERMUX_DEBUG" && DEBUG_FLAG="--with-debug"
+	$TERMUX_DEBUG && DEBUG_FLAG="--with-debug"
 
 	./configure \
 		--prefix=$TERMUX_PREFIX \

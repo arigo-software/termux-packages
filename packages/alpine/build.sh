@@ -1,9 +1,9 @@
-TERMUX_PKG_HOMEPAGE=http://repo.or.cz/alpine.git
+TERMUX_PKG_HOMEPAGE=https://repo.or.cz/alpine.git
 TERMUX_PKG_DESCRIPTION="Fast, easy to use email client"
 TERMUX_PKG_LICENSE="Apache-2.0"
-TERMUX_PKG_VERSION=2.21.9999
-TERMUX_PKG_SHA256=d5f436019860961f4cb6c9a847e2557e7a284043da59d4fab3263f9796ff646b
+TERMUX_PKG_VERSION=2.21.99999
 TERMUX_PKG_SRCURL=https://fossies.org/linux/misc/alpine-$TERMUX_PKG_VERSION.tar.xz
+TERMUX_PKG_SHA256=229de9f673430190055207f8980205186ed6f73873f1ae6e1467d9d78e0f9dec
 TERMUX_PKG_DEPENDS="libcrypt, ncurses, openssl-tool"
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 --disable-debug
@@ -15,7 +15,7 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 --with-system-pinerc=${TERMUX_PREFIX}/etc/pine.conf
 --with-passfile=$TERMUX_ANDROID_HOME/.pine-passfile
 "
-TERMUX_PKG_BUILD_IN_SRC=yes
+TERMUX_PKG_BUILD_IN_SRC=true
 
 termux_step_pre_configure() {
 	export TCC=$CC
@@ -24,7 +24,7 @@ termux_step_pre_configure() {
 	export alpine_SSLVERSION=old
 	export TPATH=$PATH
 
-	LDFLAGS+=" -lcrypt -llog"
+	export LIBS="-lcrypt -llog"
 
 	# To get S_IREAD and friends:
 	CPPFLAGS+=" -D__USE_BSD"

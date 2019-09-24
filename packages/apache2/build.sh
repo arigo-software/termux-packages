@@ -1,11 +1,12 @@
 TERMUX_PKG_HOMEPAGE=https://httpd.apache.org
 TERMUX_PKG_DESCRIPTION="Apache Web Server"
 TERMUX_PKG_LICENSE="Apache-2.0"
-TERMUX_PKG_VERSION=2.4.39
-TERMUX_PKG_REVISION=1
-TERMUX_PKG_SHA256=b4ca9d05773aa59b54d66cd8f4744b945289f084d3be17d7981d1783a5decfa2
+TERMUX_PKG_VERSION=2.4.41
+TERMUX_PKG_SHA256=133d48298fe5315ae9366a0ec66282fa4040efa5d566174481077ade7d18ea40
 TERMUX_PKG_SRCURL=https://www.apache.org/dist/httpd/httpd-$TERMUX_PKG_VERSION.tar.bz2
 TERMUX_PKG_DEPENDS="apr, apr-util, pcre, openssl, libcrypt, libandroid-support, libnghttp2, libexpat, libuuid, zlib"
+TERMUX_PKG_BREAKS="apache2-dev"
+TERMUX_PKG_REPLACES="apache2-dev"
 TERMUX_PKG_CONFFILES="
 etc/apache2/httpd.conf
 etc/apache2/extra/httpd-autoindex.conf
@@ -68,10 +69,15 @@ ac_cv_have_threadsafe_pollset=no
 "
 TERMUX_PKG_BUILD_IN_SRC=true
 TERMUX_PKG_RM_AFTER_INSTALL="share/apache2/manual etc/apache2/original share/man/man8/suexec.8 libexec/httpd.exp"
-TERMUX_PKG_INCLUDE_IN_DEVPACKAGE="share/apache2/build"
 TERMUX_PKG_EXTRA_MAKE_ARGS="-s"
 
 termux_step_pre_configure() {
+	# Certain packages are not safe to build on device because their
+	# build.sh script deletes specific files in $TERMUX_PREFIX.
+	if $TERMUX_ON_DEVICE_BUILD; then
+		termux_error_exit "Package '$TERMUX_PKG_NAME' is not safe for on-device builds."
+	fi
+
 	# remove old files
 	rm -rf "$TERMUX_PREFIX"/{libexec,share,etc}/apache2
 	rm -rf "$TERMUX_PREFIX"/lib/cgi-bin

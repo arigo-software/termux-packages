@@ -2,18 +2,23 @@ TERMUX_PKG_HOMEPAGE=https://www.openssl.org/
 TERMUX_PKG_DESCRIPTION="Library implementing the SSL and TLS protocols as well as general purpose cryptography functions"
 TERMUX_PKG_LICENSE="BSD"
 TERMUX_PKG_DEPENDS="ca-certificates"
-TERMUX_PKG_VERSION=1.1.1b
-TERMUX_PKG_REVISION=3
-TERMUX_PKG_SHA256=5c557b023230413dfb0756f3137a13e6d726838ccd1430888ad15bfb2b43ea4b
+TERMUX_PKG_VERSION=1.1.1d
+TERMUX_PKG_SHA256=1e3a91bc1f9dfce01af26026f856e064eab4c8ee0a8f457b5ae30b40b8b711f2
 TERMUX_PKG_SRCURL=https://www.openssl.org/source/openssl-${TERMUX_PKG_VERSION/\~/-}.tar.gz
 TERMUX_PKG_CONFFILES="etc/tls/openssl.cnf"
 TERMUX_PKG_RM_AFTER_INSTALL="bin/c_rehash etc/ssl/misc"
-TERMUX_PKG_BUILD_IN_SRC=yes
+TERMUX_PKG_BUILD_IN_SRC=true
 TERMUX_PKG_CONFLICTS="libcurl (<< 7.61.0-1)"
-TERMUX_PKG_BREAKS="openssl-tool (<< 1.1.1b-1)"
-TERMUX_PKG_REPLACES="openssl-tool (<< 1.1.1b-1)"
+TERMUX_PKG_BREAKS="openssl-tool (<< 1.1.1b-1), openssl-dev"
+TERMUX_PKG_REPLACES="openssl-tool (<< 1.1.1b-1), openssl-dev"
 
 termux_step_configure() {
+	# Certain packages are not safe to build on device because their
+	# build.sh script deletes specific files in $TERMUX_PREFIX.
+	if $TERMUX_ON_DEVICE_BUILD; then
+		termux_error_exit "Package '$TERMUX_PKG_NAME' is not safe for on-device builds."
+	fi
+
 	CFLAGS+=" -DNO_SYSLOG"
 	if [ $TERMUX_ARCH = arm ]; then
 		CFLAGS+=" -fno-integrated-as"

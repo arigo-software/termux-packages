@@ -1,11 +1,13 @@
 TERMUX_PKG_HOMEPAGE=https://ipfs.io/
 TERMUX_PKG_DESCRIPTION="A peer-to-peer hypermedia distribution protocol"
 TERMUX_PKG_LICENSE="MIT"
-TERMUX_PKG_MAINTAINER="Leonid Plyushch <leonid.plyushch@gmail.com> @xeffyr"
-TERMUX_PKG_VERSION=0.4.20
+TERMUX_PKG_MAINTAINER="Leonid Plyushch <leonid.plyushch@gmail.com>"
+TERMUX_PKG_VERSION=0.4.22
 TERMUX_PKG_REVISION=1
-TERMUX_PKG_SHA256=ddaeb8b8747efc81b560bb9c3e751c4277b089f3cd113e6001d1392993fb0fd0
-TERMUX_PKG_SRCURL=https://github.com/ipfs/go-ipfs/archive/v${TERMUX_PKG_VERSION}.tar.gz
+# Use a snapshot to fix building with go 1.13:
+#TERMUX_PKG_SRCURL=https://github.com/ipfs/go-ipfs/archive/v${TERMUX_PKG_VERSION}.tar.gz
+TERMUX_PKG_SRCURL=https://github.com/ipfs/go-ipfs/archive/d5977fc4759137f13c8980323d577759dad3d923.zip
+TERMUX_PKG_SHA256=7d8c791489b5de14aa72a78485d5ef87ada205b185b63d25467f42692e5d6d8d
 
 termux_step_make() {
     termux_setup_golang

@@ -1,10 +1,24 @@
 TERMUX_PKG_HOMEPAGE=https://mariadb.org
 TERMUX_PKG_DESCRIPTION="A drop-in replacement for mysql server"
 TERMUX_PKG_LICENSE="GPL-2.0"
-TERMUX_PKG_VERSION=10.3.14
-TERMUX_PKG_REVISION=4
-TERMUX_PKG_SHA256=ba1c94d92fc8ebdf9b8a1d1b93ed6aeeead33da507efbbd4afcf49f32023e054
+TERMUX_PKG_MAINTAINER="Vishal Biswas @vishalbiswas"
+TERMUX_PKG_VERSION=10.4.8
 TERMUX_PKG_SRCURL=https://ftp.osuosl.org/pub/mariadb/mariadb-$TERMUX_PKG_VERSION/source/mariadb-$TERMUX_PKG_VERSION.tar.gz
+TERMUX_PKG_SHA256=10cc2c3bdb76733c9c6fd1e3c6c860d8b4282c85926da7d472d2a0e00fffca9b
+TERMUX_PKG_DEPENDS="libc++, libiconv, liblzma, ncurses, libedit, openssl, pcre, libcrypt, libandroid-support, libandroid-glob, zlib"
+TERMUX_PKG_BREAKS="mariadb-dev"
+TERMUX_PKG_REPLACES="mariadb-dev"
+
+# Fails on i686 with:
+#
+#/home/builder/.termux-build/mariadb/src/include/my_pthread.h:822:10: error: use of undeclared identifier 'my_atomic_add32'
+#  (void) my_atomic_add32_explicit(value, 1, MY_MEMORY_ORDER_RELAXED);
+#         ^
+#/home/builder/.termux-build/mariadb/src/include/my_atomic.h:153:43: note: expanded from macro 'my_atomic_add32_explicit'
+#define my_atomic_add32_explicit(P, A, O) my_atomic_add32((P), (A))
+#
+TERMUX_PKG_BLACKLISTED_ARCHES="i686"
+
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 -DBISON_EXECUTABLE=$(which bison)
 -DGETCONF=$(which getconf)
@@ -47,9 +61,8 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 -DWITH_UNIT_TESTS=OFF
 -DINSTALL_SYSCONFDIR=$TERMUX_PREFIX/etc
 "
+
 TERMUX_PKG_HOSTBUILD=true
-TERMUX_PKG_DEPENDS="libiconv, liblzma, ncurses, libedit, openssl, pcre, libcrypt, libandroid-support, libandroid-glob, zlib"
-TERMUX_PKG_MAINTAINER="Vishal Biswas @vishalbiswas"
 TERMUX_PKG_CONFLICTS="mysql"
 TERMUX_PKG_RM_AFTER_INSTALL="bin/mysqltest*"
 
@@ -63,6 +76,12 @@ termux_step_host_build() {
 }
 
 termux_step_pre_configure() {
+	# Certain packages are not safe to build on device because their
+	# build.sh script deletes specific files in $TERMUX_PREFIX.
+	if $TERMUX_ON_DEVICE_BUILD; then
+		termux_error_exit "Package '$TERMUX_PKG_NAME' is not safe for on-device builds."
+	fi
+
 	CPPFLAGS+=" -Dushort=u_short"
 
 	if [ $TERMUX_ARCH_BITS = 32 ]; then

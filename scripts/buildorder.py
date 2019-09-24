@@ -50,14 +50,6 @@ def parse_build_file_dependencies(path):
 
     return set(dependencies)
 
-def develsplit(path):
-    with open(path, encoding="utf-8") as build_script:
-        for line in build_script:
-            if line.startswith('TERMUX_PKG_NO_DEVELSPLIT'):
-                return False
-
-    return True
-
 class TermuxPackage(object):
     "A main package definition represented by a directory with a build.sh file."
     def __init__(self, dir_path, fast_build_mode):
@@ -70,10 +62,12 @@ class TermuxPackage(object):
             raise Exception("build.sh not found for package '" + self.name + "'")
 
         self.deps = parse_build_file_dependencies(build_sh_path)
-        always_deps = ['libc++']
-        for dependency_name in always_deps:
-            if dependency_name not in self.deps and self.name not in always_deps:
-                self.deps.add(dependency_name)
+
+        if os.getenv('TERMUX_ON_DEVICE_BUILD') == "true":
+            always_deps = ['libc++']
+            for dependency_name in always_deps:
+                if dependency_name not in self.deps and self.name not in always_deps:
+                    self.deps.add(dependency_name)
 
         # search subpackages
         self.subpkgs = []
@@ -87,10 +81,8 @@ class TermuxPackage(object):
             self.deps.add(subpkg.name)
             self.deps |= subpkg.deps
 
-        if develsplit(build_sh_path):
-            subpkg = TermuxSubPackage(self.dir + '/' + self.name + '-dev' + '.subpackage.sh', self, virtual=True)
-            self.subpkgs.append(subpkg)
-            self.deps.add(subpkg.name)
+        subpkg = TermuxSubPackage(self.dir + '/' + self.name + '-static' + '.subpackage.sh', self, virtual=True)
+        self.subpkgs.append(subpkg)
 
         # Do not depend on itself
         self.deps.discard(self.name)

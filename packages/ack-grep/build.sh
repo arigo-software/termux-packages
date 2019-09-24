@@ -1,13 +1,12 @@
 TERMUX_PKG_HOMEPAGE=https://beyondgrep.com/
 TERMUX_PKG_DESCRIPTION="Tool like grep optimized for programmers"
 TERMUX_PKG_LICENSE="Artistic-License-2.0"
-TERMUX_PKG_VERSION=2.28
-TERMUX_PKG_SHA256=0ab3df19513a2c71aa7901f7f522a5baf72ce69e6e0e34879979f157210734f6
-TERMUX_PKG_SRCURL=https://beyondgrep.com/ack-${TERMUX_PKG_VERSION}-single-file
-TERMUX_PKG_SKIP_SRC_EXTRACT=yes
-# Depend on coreutils for bin/env
-TERMUX_PKG_DEPENDS="perl, coreutils"
-TERMUX_PKG_PLATFORM_INDEPENDENT=yes
+TERMUX_PKG_VERSION=3.1.1
+TERMUX_PKG_SRCURL=https://beyondgrep.com/ack-v${TERMUX_PKG_VERSION}
+TERMUX_PKG_SHA256=2d7f87caf20a42770fec7956cf939100f8741bb3409d138d21f2d9f51d0beb7c
+TERMUX_PKG_DEPENDS="perl"
+TERMUX_PKG_SKIP_SRC_EXTRACT=true
+TERMUX_PKG_PLATFORM_INDEPENDENT=true
 
 termux_step_make_install() {
 	termux_download \
