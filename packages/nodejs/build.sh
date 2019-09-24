@@ -72,13 +72,8 @@ termux_step_configure() {
 		--shared-zlib \
 		--with-intl=system-icu \
 		--without-snapshot \
-		--without-node-snapshot \
 		--cross-compiling
 
-	export LD_LIBRARY_PATH=$TERMUX_PKG_HOSTBUILD_DIR/icu-installed/lib
-	perl -p -i -e "s@LIBS := \\$\\(LIBS\\)@LIBS := -L$TERMUX_PKG_HOSTBUILD_DIR/icu-installed/lib -lpthread -licui18n -licuuc -licudata@" \
-		$TERMUX_PKG_SRCDIR/out/tools/v8_gypfiles/torque.host.mk \
-		$TERMUX_PKG_SRCDIR/out/tools/v8_gypfiles/bytecode_builtins_list_generator.host.mk \
-		$TERMUX_PKG_SRCDIR/out/tools/v8_gypfiles/v8_libbase.host.mk \
-		$TERMUX_PKG_SRCDIR/out/tools/v8_gypfiles/gen-regexp-special-case.host.mk
+	perl -p -i -e 's/LIBS := \$\(LIBS\)/LIBS := -lpthread/' \
+		$TERMUX_PKG_SRCDIR/out/deps/v8/gypfiles/torque.host.mk
 }
