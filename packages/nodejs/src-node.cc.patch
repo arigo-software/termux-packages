@@ -4,14 +4,14 @@ diff -u -r ../node-v10.9.0/src/node.cc ./src/node.cc
 @@ -106,7 +106,7 @@
  #include <unistd.h>  // setuid, getuid
  #endif
- 
+
 -#if defined(__POSIX__) && !defined(__ANDROID__) && !defined(__CloudABI__)
 +#if defined(__POSIX__) && !defined(__CloudABI__)
  #include <pwd.h>  // getpwnam()
  #include <grp.h>  // getgrnam()
  #endif
 @@ -690,7 +690,7 @@
- 
+
  // Look up environment variable unless running as setuid root.
  bool SafeGetenv(const char* key, std::string* text) {
 -#if !defined(__CloudABI__) && !defined(_WIN32)
@@ -22,7 +22,7 @@ diff -u -r ../node-v10.9.0/src/node.cc ./src/node.cc
 @@ -2402,13 +2402,13 @@
    env->SetMethod(process, "reallyExit", Exit);
    env->SetMethodNoSideEffect(process, "uptime", Uptime);
- 
+
 -#if defined(__POSIX__) && !defined(__ANDROID__) && !defined(__CloudABI__)
 +#if defined(__POSIX__) && !defined(__CloudABI__)
    env->SetMethodNoSideEffect(process, "getuid", GetUid);
@@ -33,5 +33,5 @@ diff -u -r ../node-v10.9.0/src/node.cc ./src/node.cc
 -#endif  // __POSIX__ && !defined(__ANDROID__) && !defined(__CloudABI__)
 +#endif  // __POSIX__ && !defined(__CloudABI__)
  }
- 
+
  
