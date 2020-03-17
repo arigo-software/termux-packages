@@ -107,7 +107,28 @@ termux_step_start_build() {
 			TERMUX_BUILD_IGNORE_LOCK=true ./build-package.sh -s "${PKG_DIR}"
 		done<<<$(./scripts/buildorder.py "$TERMUX_PKG_BUILDER_DIR" $TERMUX_PACKAGES_DIRECTORIES || echo "ERROR")
 	fi
-
+	if [ "$TERMUX_INSTALL_DEPS" == true ]  && [ "$TERMUX_PKG_DEPENDS" !=  "${TERMUX_PKG_DEPENDS/libllvm/}" ]; then
+                LLVM_DEFAULT_TARGET_TRIPLE=$TERMUX_HOST_PLATFORM
+        if [ $TERMUX_ARCH = "arm" ]; then
+                LLVM_TARGET_ARCH=ARM
+        elif [ $TERMUX_ARCH = "aarch64" ]; then
+                LLVM_TARGET_ARCH=AArch64
+        elif [ $TERMUX_ARCH = "i686" ]; then
+                 LLVM_TARGET_ARCH=X86
+        elif [ $TERMUX_ARCH = "x86_64" ]; then
+                LLVM_TARGET_ARCH=X86
+        fi
+        LIBLLVM_VERSION=$(grep  "TERMUX_PKG_VERSION="  $TERMUX_SCRIPTDIR/packages/libllvm/build.sh | cut -c20- )
+		echo "$LIBLLVM_VERSION"
+                        sed $TERMUX_SCRIPTDIR/packages/libllvm/llvm-config.in \
+                        -e "s|@TERMUX_PKG_VERSION@|$LIBLLVM_VERSION|g" \
+                        -e "s|@TERMUX_PREFIX@|$TERMUX_PREFIX|g" \
+                        -e "s|@TERMUX_PKG_SRCDIR@|$TERMUX_TOPDIR/libllvm/src|g" \
+                        -e "s|@LLVM_TARGET_ARCH@|$LLVM_TARGET_ARCH|g" \
+                        -e "s|@LLVM_DEFAULT_TARGET_TRIPLE@|$LLVM_DEFAULT_TARGET_TRIPLE|g" \
+                        -e "s|@TERMUX_ARCH@|$TERMUX_ARCH|g" > $TERMUX_PREFIX/bin/llvm-config
+                        chmod 755 $TERMUX_PREFIX/bin/llvm-config
+	fi
 	# Following directories may contain files with read-only permissions which
 	# makes them undeletable. We need to fix that.
 	[ -d "$TERMUX_PKG_BUILDDIR" ] && chmod +w -R "$TERMUX_PKG_BUILDDIR"
@@ -141,7 +162,7 @@ termux_step_start_build() {
 		termux_download \
 			"https://raw.githubusercontent.com/termux/termux-elf-cleaner/v$TERMUX_ELF_CLEANER_VERSION/termux-elf-cleaner.cpp" \
 			"$TERMUX_ELF_CLEANER_SRC" \
-			35a4a88542352879ca1919e2e0a62ef458c96f34ee7ce3f70a3c9f74b721d77a
+			96044b5e0a32ba9ce8bea96684a0723a9b777c4ae4b6739eaafc444dc23f6d7a
 		if [ "$TERMUX_ELF_CLEANER_SRC" -nt "$TERMUX_ELF_CLEANER" ]; then
 			g++ -std=c++11 -Wall -Wextra -pedantic -Os -D__ANDROID_API__=$TERMUX_PKG_API_LEVEL \
 				"$TERMUX_ELF_CLEANER_SRC" -o "$TERMUX_ELF_CLEANER"
