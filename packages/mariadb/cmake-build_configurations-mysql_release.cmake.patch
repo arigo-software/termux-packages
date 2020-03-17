@@ -1,6 +1,6 @@
-diff -uNr mariadb-10.4.8/cmake/build_configurations/mysql_release.cmake mariadb-10.4.8.mod/cmake/build_configurations/mysql_release.cmake
---- mariadb-10.4.8/cmake/build_configurations/mysql_release.cmake	2019-09-09 00:02:29.000000000 +0300
-+++ mariadb-10.4.8.mod/cmake/build_configurations/mysql_release.cmake	2019-09-18 16:39:38.173014925 +0300
+diff -u -r ../mariadb-10.4.12/cmake/build_configurations/mysql_release.cmake ./cmake/build_configurations/mysql_release.cmake
+--- ../mariadb-10.4.12/cmake/build_configurations/mysql_release.cmake	2020-01-26 20:43:49.000000000 +0000
++++ ./cmake/build_configurations/mysql_release.cmake	2020-02-15 23:22:03.546831000 +0000
 @@ -124,7 +124,7 @@
  
  IF(UNIX)

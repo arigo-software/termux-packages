@@ -43,8 +43,8 @@ termux_step_setup_variables() {
 		https://dl.bintray.com/grimler/game-packages-24
 		https://dl.bintray.com/grimler/science-packages-24
 		https://dl.bintray.com/grimler/termux-root-packages-24
-		https://dl.bintray.com/xeffyr/unstable-packages-24
-		https://dl.bintray.com/xeffyr/x11-packages-24
+		https://dl.bintray.com/xeffyr/unstable-packages
+		https://dl.bintray.com/xeffyr/x11-packages
 	)
 
 	TERMUX_REPO_DISTRIBUTION=(
@@ -125,6 +125,7 @@ termux_step_setup_variables() {
 	TERMUX_PKG_SUGGESTS=""
 	TERMUX_PKG_REPLACES=""
 	TERMUX_PKG_PROVIDES="" #https://www.debian.org/doc/debian-policy/#virtual-packages-provides
+        TERMUX_PKG_SERVICE_SCRIPT=() # Fill with entries like: ("daemon name" 'script to execute'). Script is echoed with -e so can contain \n for multiple lines
 	TERMUX_PKG_CONFFILES=""
 	# Set if a host build should be done in TERMUX_PKG_HOSTBUILD_DIR:
 	TERMUX_PKG_HOSTBUILD=false
@@ -132,6 +133,7 @@ termux_step_setup_variables() {
 	TERMUX_CMAKE_BUILD=Ninja # Which cmake generator to use
 	TERMUX_PKG_HAS_DEBUG=true # set to false if debug build doesn't exist or doesn't work, for example for python based packages
 	TERMUX_PKG_METAPACKAGE=false
+	TERMUX_PKG_QUICK_REBUILD=false # set this temporarily when iterating on a large package and you don't want the source and build directories wiped every time you make a mistake
 
 	unset CFLAGS CPPFLAGS LDFLAGS CXXFLAGS
 }
