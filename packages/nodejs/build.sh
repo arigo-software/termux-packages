@@ -1,16 +1,50 @@
 TERMUX_PKG_HOMEPAGE=https://nodejs.org/
 TERMUX_PKG_DESCRIPTION="Platform built on Chrome's JavaScript runtime for easily building fast, scalable network applications"
-TERMUX_PKG_VERSION=10.14.0
-TERMUX_PKG_SHA256=b05a52e556df813eb3f36c795784956b1c3c3b078cef930af6c1f2fb93642929
+TERMUX_PKG_LICENSE="MIT"
+TERMUX_PKG_VERSION=13.0.0
+TERMUX_PKG_REVISION=1
 TERMUX_PKG_SRCURL=https://nodejs.org/dist/v${TERMUX_PKG_VERSION}/node-v${TERMUX_PKG_VERSION}.tar.xz
+TERMUX_PKG_SHA256=45ff3b40afc3fc93fd62e31c0f5dfa046f307f0b33d0f32e09019f306bc74767
+# Note that we do not use a shared libuv to avoid an issue with the Android
+# linker, which does not use symbols of linked shared libraries when resolving
 # symbols on dlopen(). See https://github.com/termux/termux-packages/issues/462.
-TERMUX_PKG_DEPENDS="openssl, c-ares, libicu"
+TERMUX_PKG_DEPENDS="libc++, openssl, c-ares, libicu, zlib"
 TERMUX_PKG_RM_AFTER_INSTALL="lib/node_modules/npm/html lib/node_modules/npm/make.bat share/systemtap lib/dtrace"
-TERMUX_PKG_BUILD_IN_SRC=yes
+TERMUX_PKG_BUILD_IN_SRC=true
 TERMUX_PKG_CONFLICTS="nodejs-lts, nodejs-current"
-TERMUX_PKG_REPLACES="nodejs-current"
+TERMUX_PKG_BREAKS="nodejs-dev"
+TERMUX_PKG_REPLACES="nodejs-current, nodejs-dev"
+TERMUX_PKG_HOSTBUILD=true
 
-termux_step_configure () {
+termux_step_post_extract_package() {
+	# Prevent caching of host build:
+	rm -Rf $TERMUX_PKG_HOSTBUILD_DIR
+}
+
+termux_step_host_build() {
+	local ICU_VERSION=65.1
+	local ICU_TAR=icu4c-${ICU_VERSION//./_}-src.tar.xz
+	local ICU_DOWNLOAD=https://fossies.org/linux/misc/$ICU_TAR
+	termux_download \
+		$ICU_DOWNLOAD\
+		$TERMUX_PKG_CACHEDIR/$ICU_TAR \
+		bd002bdeb2e854a224c2617ba1d0e9ccea7fde3065682333902e234dce4dd380
+	tar xf $TERMUX_PKG_CACHEDIR/$ICU_TAR
+	cd icu/source
+	if [ "$TERMUX_ARCH_BITS" = 32 ]; then
+		./configure --prefix $TERMUX_PKG_HOSTBUILD_DIR/icu-installed \
+			--disable-samples \
+			--disable-tests \
+			--build=i686-pc-linux-gnu "CFLAGS=-m32" "CXXFLAGS=-m32" "LDFLAGS=-m32"
+	else
+		./configure --prefix $TERMUX_PKG_HOSTBUILD_DIR/icu-installed \
+			--disable-samples \
+			--disable-tests
+	fi
+	make -j $TERMUX_MAKE_PROCESSES install
+}
+
+termux_step_configure() {
 	local DEST_CPU
 	if [ $TERMUX_ARCH = "arm" ]; then
 		DEST_CPU="arm"
@@ -39,8 +73,13 @@ termux_step_configure () {
 		--shared-zlib \
 		--with-intl=system-icu \
 		--without-snapshot \
+		--without-node-snapshot \
 		--cross-compiling
 
-	perl -p -i -e 's/LIBS := \$\(LIBS\)/LIBS := -lpthread/' \
-		$TERMUX_PKG_SRCDIR/out/deps/v8/gypfiles/torque.host.mk
+	export LD_LIBRARY_PATH=$TERMUX_PKG_HOSTBUILD_DIR/icu-installed/lib
+	perl -p -i -e "s@LIBS := \\$\\(LIBS\\)@LIBS := -L$TERMUX_PKG_HOSTBUILD_DIR/icu-installed/lib -lpthread -licui18n -licuuc -licudata@" \
+		$TERMUX_PKG_SRCDIR/out/tools/v8_gypfiles/torque.host.mk \
+		$TERMUX_PKG_SRCDIR/out/tools/v8_gypfiles/bytecode_builtins_list_generator.host.mk \
+		$TERMUX_PKG_SRCDIR/out/tools/v8_gypfiles/v8_libbase.host.mk \
+		$TERMUX_PKG_SRCDIR/out/tools/v8_gypfiles/gen-regexp-special-case.host.mk
 }

@@ -1,13 +1,13 @@
 # Build with:
-#	docker build -t termux/package-builder .
+#	docker build -t termux/package-builder:legacy .
 # Push to docker hub with:
-#	docker push termux/package-builder
+#	docker push termux/package-builder:legacy
 # This is done after changing this file or any of the
 # scripts/setup-{ubuntu,android-sdk}.sh setup scripts.
-FROM ubuntu:19.10
+FROM ubuntu:19.04
 
 # Fix locale to avoid warnings:
-ENV LANG en_US.UTF-8
+ENV LANG C.UTF-8
 
 # Needed for setup:
 COPY ./setup-ubuntu.sh ./setup-android-sdk.sh ./properties.sh /tmp/
@@ -34,3 +34,4 @@ USER builder:builder
 
 # We expect this to be mounted with '-v $PWD:/home/builder/termux-packages':
 WORKDIR /home/builder/termux-packages
+

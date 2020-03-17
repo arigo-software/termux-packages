@@ -84,11 +84,7 @@ termux_create_subpackages() {
 
 		for f in $TERMUX_SUBPKG_CONFFILES; do echo "$TERMUX_PREFIX/$f" >> conffiles; done
 
-		# Allow packages to create arbitrary control files.
-		termux_step_create_subpkg_debscripts
-
-		# Create control.tar.gz
-		tar -czf "$SUB_PKG_PACKAGE_DIR/control.tar.gz" -H gnu .
+		tar -czf "$SUB_PKG_PACKAGE_DIR/control.tar.gz" .
 
 		# Create the actual .deb file:
 		TERMUX_SUBPKG_DEBFILE=$TERMUX_DEBDIR/${SUB_PKG_NAME}${DEBUG}_${TERMUX_PKG_FULLVERSION}_${SUB_PKG_ARCH}.deb

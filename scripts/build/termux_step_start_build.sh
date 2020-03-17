@@ -8,10 +8,11 @@ termux_step_start_build() {
 		TERMUX_PKG_PLATFORM_INDEPENDENT=true
 	fi
 
-	TERMUX_STANDALONE_TOOLCHAIN="$TERMUX_COMMON_CACHEDIR/android-r${TERMUX_NDK_VERSION}-api-${TERMUX_PKG_API_LEVEL}"
+	TERMUX_STANDALONE_TOOLCHAIN="$TERMUX_COMMON_CACHEDIR/android5-r${TERMUX_NDK_VERSION}-api-${TERMUX_PKG_API_LEVEL}"
+
 	# Bump the below version if a change is made in toolchain setup to ensure
 	# that everyone gets an updated toolchain:
-	TERMUX_STANDALONE_TOOLCHAIN+="-v3"
+	TERMUX_STANDALONE_TOOLCHAIN+="-v2"
 
 	if [ -n "${TERMUX_PKG_BLACKLISTED_ARCHES:=""}" ] && [ "$TERMUX_PKG_BLACKLISTED_ARCHES" != "${TERMUX_PKG_BLACKLISTED_ARCHES/$TERMUX_ARCH/}" ]; then
 		echo "Skipping building $TERMUX_PKG_NAME for arch $TERMUX_ARCH"
@@ -128,21 +129,15 @@ termux_step_start_build() {
                         -e "s|@TERMUX_ARCH@|$TERMUX_ARCH|g" > $TERMUX_PREFIX/bin/llvm-config
                         chmod 755 $TERMUX_PREFIX/bin/llvm-config
 	fi
-	if [ "$TERMUX_PKG_QUICK_REBUILD" != "true" ]; then
-		# Following directories may contain files with read-only permissions which
-		# makes them undeletable. We need to fix that.
-		[ -d "$TERMUX_PKG_BUILDDIR" ] && chmod +w -R "$TERMUX_PKG_BUILDDIR"
-		[ -d "$TERMUX_PKG_SRCDIR" ] && chmod +w -R "$TERMUX_PKG_SRCDIR"
+	# Following directories may contain files with read-only permissions which
+	# makes them undeletable. We need to fix that.
+	[ -d "$TERMUX_PKG_BUILDDIR" ] && chmod +w -R "$TERMUX_PKG_BUILDDIR"
+	[ -d "$TERMUX_PKG_SRCDIR" ] && chmod +w -R "$TERMUX_PKG_SRCDIR"
 
-		# Cleanup old build state:
-		rm -Rf "$TERMUX_PKG_BUILDDIR" \
-			"$TERMUX_PKG_SRCDIR"
-	else
-		TERMUX_PKG_SKIP_SRC_EXTRACT=true
-	fi
-
-	# Cleanup old packaging state:
-	rm -Rf "$TERMUX_PKG_PACKAGEDIR" \
+	# Cleanup old state:
+	rm -Rf "$TERMUX_PKG_BUILDDIR" \
+		"$TERMUX_PKG_PACKAGEDIR" \
+		"$TERMUX_PKG_SRCDIR" \
 		"$TERMUX_PKG_TMPDIR" \
 		"$TERMUX_PKG_MASSAGEDIR"
 
@@ -156,20 +151,27 @@ termux_step_start_build() {
 		 "$TERMUX_PKG_MASSAGEDIR" \
 		 $TERMUX_PREFIX/{bin,etc,lib,libexec,share,share/LICENSES,tmp,include}
 
-	# Make $TERMUX_PREFIX/bin/sh executable on the builder, so that build
-	# scripts can assume that it works on both builder and host later on:
-	[ "$TERMUX_ON_DEVICE_BUILD" = "false" ] && ln -sf /bin/sh "$TERMUX_PREFIX/bin/sh"
+	if [ "$TERMUX_ON_DEVICE_BUILD" = "false" ]; then
+		# Make $TERMUX_PREFIX/bin/sh executable on the builder, so that build
+		# scripts can assume that it works on both builder and host later on:
+		ln -sf /bin/sh "$TERMUX_PREFIX/bin/sh"
 
-	local TERMUX_ELF_CLEANER_SRC=$TERMUX_COMMON_CACHEDIR/termux-elf-cleaner.cpp
-	local TERMUX_ELF_CLEANER_VERSION
-	TERMUX_ELF_CLEANER_VERSION=$(bash -c ". $TERMUX_SCRIPTDIR/packages/termux-elf-cleaner/build.sh; echo \$TERMUX_PKG_VERSION")
-	termux_download \
-		"https://raw.githubusercontent.com/termux/termux-elf-cleaner/v$TERMUX_ELF_CLEANER_VERSION/termux-elf-cleaner.cpp" \
-		"$TERMUX_ELF_CLEANER_SRC" \
-		35a4a88542352879ca1919e2e0a62ef458c96f34ee7ce3f70a3c9f74b721d77a
-	if [ "$TERMUX_ELF_CLEANER_SRC" -nt "$TERMUX_ELF_CLEANER" ]; then
-		g++ -std=c++11 -Wall -Wextra -pedantic -Os -D__ANDROID_API__=$TERMUX_PKG_API_LEVEL \
-			"$TERMUX_ELF_CLEANER_SRC" -o "$TERMUX_ELF_CLEANER"
+		local TERMUX_ELF_CLEANER_SRC=$TERMUX_COMMON_CACHEDIR/termux-elf-cleaner.cpp
+		local TERMUX_ELF_CLEANER_VERSION
+		TERMUX_ELF_CLEANER_VERSION=$(bash -c ". $TERMUX_SCRIPTDIR/packages/termux-elf-cleaner/build.sh; echo \$TERMUX_PKG_VERSION")
+		termux_download \
+			"https://raw.githubusercontent.com/termux/termux-elf-cleaner/v$TERMUX_ELF_CLEANER_VERSION/termux-elf-cleaner.cpp" \
+			"$TERMUX_ELF_CLEANER_SRC" \
+			96044b5e0a32ba9ce8bea96684a0723a9b777c4ae4b6739eaafc444dc23f6d7a
+		if [ "$TERMUX_ELF_CLEANER_SRC" -nt "$TERMUX_ELF_CLEANER" ]; then
+			g++ -std=c++11 -Wall -Wextra -pedantic -Os -D__ANDROID_API__=$TERMUX_PKG_API_LEVEL \
+				"$TERMUX_ELF_CLEANER_SRC" -o "$TERMUX_ELF_CLEANER"
+		fi
+	else
+		# Ensure that termux-elf-cleaner is always installed.
+		if [ "$(dpkg-query -W -f '${db:Status-Status}\n' termux-elf-cleaner 2>/dev/null)" != "installed" ]; then
+			apt update && apt install -y termux-elf-cleaner
+		fi
 	fi
 
 	if [ "$TERMUX_PKG_BUILD_IN_SRC" = "true" ]; then

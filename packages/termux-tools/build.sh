@@ -1,7 +1,7 @@
 TERMUX_PKG_HOMEPAGE=https://termux.com/
 TERMUX_PKG_DESCRIPTION="Basic system tools for Termux"
 TERMUX_PKG_LICENSE="GPL-3.0"
-TERMUX_PKG_VERSION=0.74
+TERMUX_PKG_VERSION=0.75
 TERMUX_PKG_SKIP_SRC_EXTRACT=true
 TERMUX_PKG_PLATFORM_INDEPENDENT=true
 TERMUX_PKG_ESSENTIAL=true
@@ -34,7 +34,7 @@ termux_step_make_install() {
 
 	for script in chsh dalvikvm login pkg su termux-fix-shebang termux-info \
 		termux-open termux-open-url termux-reload-settings termux-setup-storage \
-		termux-wake-lock termux-wake-unlock; do
+		termux-upgrade-repo termux-wake-lock termux-wake-unlock; do
 			install -Dm700 $TERMUX_PKG_BUILDER_DIR/$script $TERMUX_PREFIX/bin/$script
 			perl -p -i -e "s%\@TERMUX_PREFIX\@%${TERMUX_PREFIX}%g" $TERMUX_PREFIX/bin/$script
 	done

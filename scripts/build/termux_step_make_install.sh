@@ -14,14 +14,12 @@ termux_step_make_install() {
 	elif test -f Cargo.toml; then
 		termux_setup_rust
 		cargo install \
-			--jobs $TERMUX_MAKE_PROCESSES \
 			--path . \
 			--force \
 			--target $CARGO_TARGET_NAME \
 			--root $TERMUX_PREFIX \
 			$TERMUX_PKG_EXTRA_CONFIGURE_ARGS
 		# https://github.com/rust-lang/cargo/issues/3316:
-		rm -f $TERMUX_PREFIX/.crates.toml
-		rm -f $TERMUX_PREFIX/.crates2.json
+		rm $TERMUX_PREFIX/.crates.toml
 	fi
 }

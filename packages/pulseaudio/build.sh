@@ -20,6 +20,7 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--disable-neon-opt
 --with-database=simple
 --disable-memfd
 --disable-gsettings
+--bindir=$TERMUX_PREFIX/libexec
 ax_cv_PTHREAD_PRIO_INHERIT=no"
 TERMUX_PKG_CONFFILES="etc/pulse/client.conf etc/pulse/daemon.conf etc/pulse/default.pa etc/pulse/system.pa"
 
@@ -42,7 +43,7 @@ termux_step_pre_configure() {
 	mkdir $TERMUX_PKG_SRCDIR/src/modules/aaudio
 	cp $TERMUX_PKG_BUILDER_DIR/module-aaudio-sink.c $TERMUX_PKG_SRCDIR/src/modules/aaudio
 
-	export LIBS="-landroid-glob"
+	export LIBS="-llog -landroid-glob"
 }
 
 termux_step_post_make_install() {
@@ -58,4 +59,18 @@ termux_step_post_make_install() {
 		-e '/^load-module module-detect$/s/^/#/'
 	echo "load-module module-sles-sink" >> $TERMUX_PREFIX/etc/pulse/default.pa
 	echo "#load-module module-aaudio-sink" >> $TERMUX_PREFIX/etc/pulse/default.pa
+
+	if [ "$TERMUX_ARCH_BITS" = 32 ]; then
+		SYSTEM_LIB=lib
+	else
+		SYSTEM_LIB=lib64
+	fi
+
+	cd $TERMUX_PREFIX/libexec
+	for bin in pacat pacmd pactl pasuspender pulseaudio; do
+		rm -f ../bin/$bin
+		echo "#!$TERMUX_PREFIX/bin/sh" >> ../bin/$bin
+		echo "LD_LIBRARY_PATH=/system/$SYSTEM_LIB:/system/vendor/$SYSTEM_LIB:$TERMUX_PREFIX/lib exec $TERMUX_PREFIX/libexec/$bin \"\$@\"" >> ../bin/$bin
+		chmod +x ../bin/$bin
+	done
 }
