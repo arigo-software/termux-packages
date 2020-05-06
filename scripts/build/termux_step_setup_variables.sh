@@ -5,7 +5,7 @@ termux_step_setup_variables() {
 	: "${TERMUX_PREFIX:="/data/data/com.termux/files/usr"}"
 	: "${TERMUX_ANDROID_HOME:="/data/data/com.termux/files/home"}"
 	: "${TERMUX_DEBUG:="false"}"
-	: "${TERMUX_PKG_API_LEVEL:="21"}"
+	: "${TERMUX_PKG_API_LEVEL:="24"}"
 	: "${TERMUX_NO_CLEAN:="false"}"
 	: "${TERMUX_QUIET_BUILD:="false"}"
 	: "${TERMUX_DEBDIR:="${TERMUX_SCRIPTDIR}/debs"}"
@@ -39,10 +39,12 @@ termux_step_setup_variables() {
 	fi
 
 	TERMUX_REPO_URL=(
-		https://termux.net
-		https://dl.bintray.com/grimler/game-packages-21
-		https://dl.bintray.com/grimler/science-packages-21
-		https://dl.bintray.com/grimler/termux-root-packages-21
+		https://dl.bintray.com/termux/termux-packages-24
+		https://dl.bintray.com/grimler/game-packages-24
+		https://dl.bintray.com/grimler/science-packages-24
+		https://dl.bintray.com/grimler/termux-root-packages-24
+		https://dl.bintray.com/xeffyr/unstable-packages
+		https://dl.bintray.com/xeffyr/x11-packages
 	)
 
 	TERMUX_REPO_DISTRIBUTION=(
@@ -50,6 +52,8 @@ termux_step_setup_variables() {
 		games
 		science
 		root
+		unstable
+		x11
 	)
 
 	TERMUX_REPO_COMPONENT=(
@@ -57,6 +61,8 @@ termux_step_setup_variables() {
 		stable
 		stable
 		stable
+		main
+		main
 	)
 
 	if [ "x86_64" = "$TERMUX_ARCH" ] || [ "aarch64" = "$TERMUX_ARCH" ]; then
@@ -85,12 +91,7 @@ termux_step_setup_variables() {
 	TERMUX_D8=$ANDROID_HOME/build-tools/$TERMUX_ANDROID_BUILD_TOOLS_VERSION/d8
 
 	TERMUX_COMMON_CACHEDIR="$TERMUX_TOPDIR/_cache"
-
-	if [ "$TERMUX_ON_DEVICE_BUILD" = "false" ]; then
-		TERMUX_ELF_CLEANER=$TERMUX_COMMON_CACHEDIR/termux-elf-cleaner-android5
-	else
-		TERMUX_ELF_CLEANER="termux-elf-cleaner"
-	fi
+	TERMUX_ELF_CLEANER=$TERMUX_COMMON_CACHEDIR/termux-elf-cleaner
 
 	export prefix=${TERMUX_PREFIX}
 	export PREFIX=${TERMUX_PREFIX}
@@ -124,6 +125,7 @@ termux_step_setup_variables() {
 	TERMUX_PKG_SUGGESTS=""
 	TERMUX_PKG_REPLACES=""
 	TERMUX_PKG_PROVIDES="" #https://www.debian.org/doc/debian-policy/#virtual-packages-provides
+        TERMUX_PKG_SERVICE_SCRIPT=() # Fill with entries like: ("daemon name" 'script to execute'). Script is echoed with -e so can contain \n for multiple lines
 	TERMUX_PKG_CONFFILES=""
 	# Set if a host build should be done in TERMUX_PKG_HOSTBUILD_DIR:
 	TERMUX_PKG_HOSTBUILD=false
@@ -131,6 +133,7 @@ termux_step_setup_variables() {
 	TERMUX_CMAKE_BUILD=Ninja # Which cmake generator to use
 	TERMUX_PKG_HAS_DEBUG=true # set to false if debug build doesn't exist or doesn't work, for example for python based packages
 	TERMUX_PKG_METAPACKAGE=false
+	TERMUX_PKG_QUICK_REBUILD=false # set this temporarily when iterating on a large package and you don't want the source and build directories wiped every time you make a mistake
 
 	unset CFLAGS CPPFLAGS LDFLAGS CXXFLAGS
 }

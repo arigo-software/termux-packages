@@ -1,10 +1,11 @@
 TERMUX_PKG_HOMEPAGE=http://www.mutt.org/
 TERMUX_PKG_DESCRIPTION="Mail client with patches from neomutt"
 TERMUX_PKG_LICENSE="GPL-2.0"
-TERMUX_PKG_VERSION=1.13.0
+TERMUX_PKG_VERSION=1.13.4
 TERMUX_PKG_SRCURL=ftp://ftp.mutt.org/pub/mutt/mutt-${TERMUX_PKG_VERSION}.tar.gz
-TERMUX_PKG_SHA256=a00ddc21084f45f53653c35a8a991ca86d68c7162b7c8ec1625d63cfeaf5f5b7
+TERMUX_PKG_SHA256=b57d3f1040d8018114cf1033dab229f36e4becbcdf59c2edeb294fc044ffcd04
 TERMUX_PKG_DEPENDS="libandroid-support, ncurses, gdbm, openssl, libsasl, mime-support, zlib, libiconv"
+
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 mutt_cv_c99_snprintf=yes
 mutt_cv_c99_vsnprintf=yes
@@ -21,6 +22,7 @@ mutt_cv_c99_vsnprintf=yes
 --with-sasl
 --with-ssl
 "
+
 TERMUX_PKG_RM_AFTER_INSTALL="
 bin/flea
 bin/muttbug
@@ -28,6 +30,7 @@ share/man/man1/muttbug.1
 share/man/man1/flea.1
 etc/mime.types
 "
+
 TERMUX_PKG_CONFFILES="etc/Muttrc"
 
 termux_step_post_configure() {

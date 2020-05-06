@@ -2,13 +2,15 @@ TERMUX_PKG_HOMEPAGE=https://python.org/
 TERMUX_PKG_DESCRIPTION="Python 3 programming language intended to enable clear programs"
 TERMUX_PKG_LICENSE="PythonPL"
 _MAJOR_VERSION=3.8
-TERMUX_PKG_VERSION=${_MAJOR_VERSION}.0
-TERMUX_PKG_REVISION=1
+TERMUX_PKG_VERSION=${_MAJOR_VERSION}.2
 TERMUX_PKG_SRCURL=https://www.python.org/ftp/python/${TERMUX_PKG_VERSION}/Python-${TERMUX_PKG_VERSION}.tar.xz
-TERMUX_PKG_SHA256=b356244e13fb5491da890b35b13b2118c3122977c2cd825e3eb6e7d462030d84
-TERMUX_PKG_DEPENDS="libandroid-support, ncurses, readline, libffi, openssl, libutil, libbz2, libsqlite, gdbm, ncurses-ui-libs, libcrypt, liblzma, zlib"
+TERMUX_PKG_SHA256=2646e7dc233362f59714c6193017bb2d6f7b38d6ab4a0cb5fbac5c36c4d845df
+TERMUX_PKG_DEPENDS="gdbm, libandroid-support, libbz2, libcrypt, libffi, liblzma, libsqlite, ncurses, ncurses-ui-libs, openssl, readline, zlib"
+TERMUX_PKG_RECOMMENDS="clang"
+TERMUX_PKG_SUGGESTS="python-tkinter"
+TERMUX_PKG_BREAKS="python2 (<= 2.7.15), python-dev"
+TERMUX_PKG_REPLACES="python-dev"
 
-# The flag --with(out)-pymalloc (disable/enable specialized mallocs) is enabled by default and causes m suffix versions of python.
 # Set ac_cv_func_wcsftime=no to avoid errors such as "character U+ca0025 is not in range [U+0000; U+10ffff]"
 # when executing e.g. "from time import time, strftime, localtime; print(strftime(str('%Y-%m-%d %H:%M'), localtime()))"
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS="ac_cv_file__dev_ptmx=yes ac_cv_file__dev_ptc=no ac_cv_func_wcsftime=no"
@@ -28,20 +30,22 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" ac_cv_buggy_getaddrinfo=no"
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" --enable-loadable-sqlite-extensions"
 # Fix https://github.com/termux/termux-packages/issues/2236:
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" ac_cv_little_endian_double=yes"
+# Force disable semaphores (Android does not support them).
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" ac_cv_func_sem_open=no"
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" ac_cv_func_sem_timedwait=no"
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" ac_cv_func_sem_getvalue=no"
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" ac_cv_func_sem_unlink=no"
+
 TERMUX_PKG_RM_AFTER_INSTALL="
-bin/idle*
-lib/python${_MAJOR_VERSION}/idlelib
-lib/python${_MAJOR_VERSION}/tkinter
-lib/python${_MAJOR_VERSION}/turtle.py
-lib/python${_MAJOR_VERSION}/turtledemo
 lib/python${_MAJOR_VERSION}/test
 lib/python${_MAJOR_VERSION}/*/test
 lib/python${_MAJOR_VERSION}/*/tests
 "
-TERMUX_PKG_BREAKS="python2 (<= 2.7.15), python-dev"
-TERMUX_PKG_REPLACES="python-dev"
 
 termux_step_pre_configure() {
+	# -O3 gains some additional performance on at least aarch64.
+	CFLAGS="${CFLAGS/-Oz/-O3}"
+
 	# Needed when building with clang, as setup.py only probes
 	# gcc for include paths when finding headers for determining
 	# if extension modules should be built (specifically, the
@@ -53,6 +57,7 @@ termux_step_pre_configure() {
 
 termux_step_post_make_install() {
 	(cd $TERMUX_PREFIX/bin
+	 ln -sf idle${_MAJOR_VERSION} idle
 	 ln -sf python${_MAJOR_VERSION} python
 	 ln -sf python${_MAJOR_VERSION}-config python-config
 	 ln -sf pydoc${_MAJOR_VERSION} pydoc)
@@ -62,7 +67,7 @@ termux_step_post_make_install() {
 
 termux_step_post_massage() {
 	# Verify that desired modules have been included:
-	for module in _bz2 _curses _lzma _sqlite3 _ssl zlib; do
+	for module in _bz2 _curses _lzma _sqlite3 _ssl _tkinter zlib; do
 		if [ ! -f "${TERMUX_PREFIX}/lib/python${_MAJOR_VERSION}/lib-dynload/${module}".*.so ]; then
 			termux_error_exit "Python module library $module not built"
 		fi

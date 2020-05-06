@@ -1,4 +1,5 @@
-TERMUX_SUBPKG_DESCRIPTION="Utilities that come with MuPDF package"
+TERMUX_SUBPKG_DESCRIPTION="Lightweight PDF and XPS viewer (utilities)"
 TERMUX_SUBPKG_INCLUDE="
 bin/
-share/man/man1/"
+share/man/man1/
+"
