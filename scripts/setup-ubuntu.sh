@@ -7,7 +7,8 @@ PACKAGES=""
 PACKAGES+=" locales"
 
 # Used by build-package.sh and CI/CD scripts.
-PACKAGES+=" curl" # Used for fetching sources.
+PACKAGES+=" curl"
+PACKAGES+=" gnupg"
 PACKAGES+=" jq"
 
 # Used for fetching package sources from Git repositories.
@@ -83,6 +84,9 @@ PACKAGES+=" ruby"
 PACKAGES+=" libc-ares-dev"
 PACKAGES+=" libicu-dev"
 
+# Needed by php.
+PACKAGES+=" re2c"
+
 # Needed by package rust.
 PACKAGES+=" libssl-dev" # Needed to build Rust
 
@@ -98,6 +102,11 @@ PACKAGES+=" zlib1g-dev:i386"
 
 # So we don't build llvm for build.
 PACKAGES+=" llvm-8-tools"
+
+# For swift.
+PACKAGES+=" clang-9"
+PACKAGES+=" libtinfo5"
+PACKAGES+=" lld"
 
 # Needed by gitea.
 PACKAGES+=" npm"
@@ -122,7 +131,7 @@ PACKAGES+=" gtk-3-examples"
 PACKAGES+=" gtk-doc-tools"
 PACKAGES+=" itstool"
 PACKAGES+=" libgdk-pixbuf2.0-dev"
-PACKAGES+=" python-xcbgen"
+PACKAGES+=" python3-xcbgen"
 PACKAGES+=" xfonts-utils"
 
 # Do not require sudo if already running as root.
