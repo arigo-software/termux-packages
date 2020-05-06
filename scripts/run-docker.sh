@@ -44,7 +44,7 @@ docker start $CONTAINER_NAME >/dev/null 2>&1 || {
 }
 
 if [ "$#" -eq  "0" ]; then
-	docker exec --interactive $DOCKER_TTY $CONTAINER_NAME bash
+	docker exec $DOCKER_TTY $CONTAINER_NAME bash
 else
-	docker exec --interactive $DOCKER_TTY $CONTAINER_NAME "$@"
+	docker exec $DOCKER_TTY $CONTAINER_NAME $@
 fi
